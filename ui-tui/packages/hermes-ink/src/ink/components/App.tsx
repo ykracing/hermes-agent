@@ -79,6 +79,7 @@ type Props = {
   // Copy the active fullscreen text selection without clearing the highlight.
   // Used for terminal-native right-click-copy behaviour.
   readonly onCopySelectionNoClear: () => Promise<string>
+  readonly getSelectedText: () => string
   // Look up the OSC 8 hyperlink at (col, row) synchronously at click
   // time. Returns the URL or undefined. The browser-open is deferred by
   // MULTI_CLICK_TIMEOUT_MS so double-click can cancel it.
@@ -637,6 +638,10 @@ export function handleMouseEvent(app: App, m: ParsedMouse): void {
 
       if (baseButton === 2 && hasSelection(sel)) {
         if ((m.button & 0x20) !== 0) {
+          return
+        }
+
+        if (!app.props.getSelectedText()) {
           return
         }
 

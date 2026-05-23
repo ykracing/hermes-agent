@@ -12,6 +12,7 @@ const makeApp = () => {
     lastHoverRow: -1,
     mouseCaptureTarget: undefined,
     props: {
+      getSelectedText: vi.fn(() => 'selected text'),
       onCopySelectionNoClear: vi.fn(async () => 'selected text'),
       onHoverAt: vi.fn(),
       onMouseDownAt: vi.fn(),
@@ -50,6 +51,20 @@ describe('handleMouseEvent right-click selection behavior', () => {
 
     expect(app.props.onCopySelectionNoClear).toHaveBeenCalledOnce()
     expect(app.props.onMouseDownAt).toHaveBeenCalledWith(2, 0, 2)
+  })
+
+  it('does not paste when highlighted selection text is empty', async () => {
+    const app = makeApp()
+    app.props.getSelectedText.mockReturnValue('')
+
+    startSelection(app.props.selection, 0, 0)
+    updateSelection(app.props.selection, 4, 0)
+
+    handleMouseEvent(app, { action: 'press', button: 2, col: 3, kind: 'mouse', row: 1 })
+    await Promise.resolve()
+
+    expect(app.props.onCopySelectionNoClear).not.toHaveBeenCalled()
+    expect(app.props.onMouseDownAt).not.toHaveBeenCalled()
   })
 
   it('does not repeatedly copy or paste during right-button motion events over a selection', () => {
